@@ -120,7 +120,15 @@ p <- p + ylab("Total Number os Steps")
 p <- p + ggtitle("Histogram - MEAN of total Number of Steps per Day")
 p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
                     color="blue", 
-                    linetype="dashed", size=0.5)
+                    linetype="dashed", 
+                    size=0.5,
+                    show_guide = TRUE) # "show_guide" is needed to show in legend 
+
+# This 2 lines put the mean line in the legend or guide
+ p <- p + geom_line(aes(color="Mean"), linetype="dashed")
+ p <- p + scale_colour_manual(name="", values=c("Mean"= "blue"))
+
+
 print(p)
 ```
 
@@ -154,16 +162,50 @@ p <- p + ylab("Total Number os Steps")
 p <- p + ggtitle("Histogram - MEDIAN of total Number of Steps per Day")
 p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
                     color="green", 
-                    linetype="dashed", size=0.5)
+                    linetype="dashed", 
+                    size=0.5,
+                    show_guide = TRUE) # "show_guide" is needed to show in legend
+
+# This 2 lines put the mean line in the legend or guide
+ p <- p + geom_line(aes(color="Median"), linetype="dashed")
+ p <- p + scale_colour_manual(name="", values=c("Median"= "green"))
+
 print(p)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
+NOTE: We use two different plots because the mean and median values are very similar. In this way, we can see the lines more clearly.
 
 ## **What is the average daily activity pattern?**
+     
+### 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)  
 
 
+```r
+mean_steps_per_interval <- summarise(group_by(clean_data,interval), mean(steps))
+colnames(mean_steps_per_interval) <- c("interval","meanSteps")
+head(mean_steps_per_interval)
+```
+
+```
+## Source: local data frame [6 x 2]
+## 
+##   interval meanSteps
+## 1        0 1.7169811
+## 2        5 0.3396226
+## 3       10 0.1320755
+## 4       15 0.1509434
+## 5       20 0.0754717
+## 6       25 2.0943396
+```
+
+
+```r
+plot(mean_steps_per_interval$interval, y = mean_steps_per_interval$meanSteps, type = "l")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
 ## Imputing missing values
 
