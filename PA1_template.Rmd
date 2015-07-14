@@ -82,8 +82,7 @@ p <- p + ggtitle("Histogram - MEAN of total Number of Steps per Day")
 p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
                     color="blue", 
                     linetype="dashed", 
-                    size=0.5,
-                    show_guide = TRUE) # "show_guide" is needed to show in legend 
+                    size=0.5)
 
 # This 2 lines put the mean line in the legend or guide
  p <- p + geom_line(aes(color="Mean"), linetype="dashed")
@@ -116,8 +115,7 @@ p <- p + ggtitle("Histogram - MEDIAN of total Number of Steps per Day")
 p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
                     color="green", 
                     linetype="dashed", 
-                    size=0.5,
-                    show_guide = TRUE) # "show_guide" is needed to show in legend
+                    size=0.5) 
 
 # This 2 lines put the mean line in the legend or guide
  p <- p + geom_line(aes(color="Median"), linetype="dashed")
@@ -132,17 +130,64 @@ NOTE: We use two different plots because the mean and median values are very sim
      
 ### 1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)  
 
+We need to group the data by interval, and then calculate the mean of steps values.
+
 ```{r  echo=TRUE}
 mean_steps_per_interval <- summarise(group_by(clean_data,interval), mean(steps))
 colnames(mean_steps_per_interval) <- c("interval","meanSteps")
 head(mean_steps_per_interval)
 ```
 
+
+In this case we are going to use the base plot system.
+
 ```{r  echo=TRUE}
-plot(mean_steps_per_interval$interval, y = mean_steps_per_interval$meanSteps, type = "l")
+plot(mean_steps_per_interval$interval, 
+     y = mean_steps_per_interval$meanSteps, 
+     type = "l",
+     col = "red",
+     main = "Time Series Plot - Avg. of Steps per Interval",
+     xlab = "Interval",
+     ylab = "Mean of Number of Steps")
 ```
 
-## Imputing missing values
+### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+We are going to calculate the MAX value of meanSteps column:
+
+```{r  echo=TRUE}
+max_interval_value_df <- subset(mean_steps_per_interval,  meanSteps == max(meanSteps))
+
+# print the dataframe
+max_interval_value_df
+```
+
+The 5-minute interval **`r max_interval_value_df$interval`**, contains the maximum number of steps.
+
+```{r  echo=TRUE}
+plot(mean_steps_per_interval$interval, 
+     y = mean_steps_per_interval$meanSteps, 
+     type = "l",
+     col = "red",
+     main = "5-minute interval with Maximum number of Steps",
+     xlab = "Interval",
+     ylab = "Mean of Number of Steps")
+        
+    abline(v=max_interval_value_df$interval, col="purple", )
+```
+
+## **Imputing missing values**
+
+### 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+
+```{r  echo=TRUE}
+sum(is.na(data$steps))
+```
+
+The total number of missing values in the dataset is **`r sum(is.na(data$steps))`**.   
+
+
+### 2. Devise a strategy for filling in all of the missing values in the dataset
 
 
 
