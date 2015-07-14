@@ -189,6 +189,27 @@ The total number of missing values in the dataset is **`r sum(is.na(data$steps))
 
 ### 2. Devise a strategy for filling in all of the missing values in the dataset
 
+**The strategy:** for filling in all of the missing values in the dataset, we want to use the **mean value for that day**. So, we need to calculate a new dataset with the mean of steps of each day.
+
+```{r  echo=TRUE}
+mean_steps_per_day <- summarise(group_by(clean_data, date), mean(steps))
+colnames(mean_steps_per_day) <- c("date", "meanPerDay")
+head(mean_steps_per_day)
+```
+
+We use this *mean_steps_per_day* dataset to get the mean value for every day, and replace NA's in the original dataset *data*. We are going to do the changes in a new copy of the original dataset. The name of this new dataset is *data_copy*.
+
+```{r  echo=TRUE}
+data_copy <- data
+head(data_copy)
+```
+
+# add a new column AVERAGE whit the mean od steps for each day
+data_copy$Average <- ave(data_copy$steps, data_copy$date)
+
+# order dataframe by column number 3 (interval)
+data_copy_ordered_by_interval <- data_copy[order(data_copy[, 3]), ]
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
