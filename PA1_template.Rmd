@@ -212,7 +212,7 @@ head(data_copy)
 Now, we can replace the steps column with NA's values, with the corresponding *mean_Steps_Per_Interval* column values in *data_copy* dataset.
 
 
-```{r  echo=TRUE}
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
 data_copy <- mutate(data_copy, steps = replace(data_copy$steps, 
                                                is.na(data_copy$steps), 
                                                data_copy$mean_Steps_Per_Interval))
@@ -301,6 +301,73 @@ median_without_na
 
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+## **Are there differences in activity patterns between weekdays and weekends?**
 
+### 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day. Use the dataset with the filled-in missing values for this part.
 
+```{r  echo=TRUE, message=FALSE, warning=FALSE}
+## I need to change my LOCALE (spanish) to English...so, daynames are in english
+Sys.setlocale('LC_TIME', 'en_US.UTF-8')
+
+## Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day
+data_copy$day_type <- as.factor(ifelse(weekdays(as.Date(data_copy$date)) %in% 
+                                        c('Saturday','Sunday'), "weekend","weekday" ))
+
+## show the dataset
+head(data_copy)
+
+# revert the LOCALE to es_ES for showing week Days in spanish
+Sys.setlocale('LC_TIME', 'es_ES.UTF-8')
+``` 
+
+### 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+
+```{r  echo=TRUE}
+# create a new dataset with the average number of steps taken
+mean_steps_per_interval2 <- summarise(group_by(data_copy,interval, day_type), mean(steps))
+
+## correct the column names (mean(steps) --> meanSteps)
+colnames(mean_steps_per_interval2) <- c("interval", "day_type","meanSteps")
+
+# Show the dataset
+head(mean_steps_per_interval2)
+```
+
+Now, we can plot 2 panels, one for weekend and other for weekdays. In this case, we are going to use the *lattice* graphics package.
+
+```{r  echo=TRUE}
+library(lattice)
+
+xyplot(meanSteps ~ interval | mean_steps_per_interval2$day_type, 
+        data = mean_steps_per_interval2,  
+        panel = function(x, y, ...) {
+               panel.xyplot(x, y, ...)
+               panel.abline(h = mean(y), lty=2,col="blue", ...)
+               panel.abline(h = median(y), lty=2,col="green", ...)
+             },
+        type = "l",
+        xlab = "Interval",
+        ylab = "Mean of Number of Steps",
+        layout=c(1,2))
+```
+
+Now we can analyze separately several values for weekend days and weekday days.
+
+```{r  echo=TRUE}
+
+## subsetting weekend days
+weekend_days <- subset(mean_steps_per_interval2, mean_steps_per_interval2$day_type == "weekend")
+
+## subsetting weekday days
+weekday_days <- subset(mean_steps_per_interval2, mean_steps_per_interval2$day_type == "weekday")
+
+# print a summary of meanSteps values
+summary(weekend_days$meanSteps)
+summary(weekday_days$meanSteps)
+```
+
+In general, there are more activity in weekend days, though the interval maximum activity is given in weekdays (205.400). The mean and median values are higher in weekend days than weekday days.
+
+    
+      
+            
