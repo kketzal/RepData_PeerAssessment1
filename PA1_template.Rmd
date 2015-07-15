@@ -338,7 +338,7 @@ Now, we can plot 2 panels, one for weekend and other for weekdays. In this case,
 ```{r  echo=TRUE}
 library(lattice)
 
-xyplot(meanSteps ~ interval | mean_steps_per_interval2$day_type, 
+xyplot(meanSteps ~ interval | day_type, 
         data = mean_steps_per_interval2,  
         panel = function(x, y, ...) {
                panel.xyplot(x, y, ...)
