@@ -62,7 +62,8 @@ print(p)
 
 A. First we can calculate the MEAN value:
 ```{r  echo=TRUE}
-mean(total_steps_per_day$totalSteps)
+mean_without_na <- mean(total_steps_per_day$totalSteps)
+mean_without_na
 ``` 
 
 B. And then plot the MEAN as the blue dashed line:
@@ -70,32 +71,33 @@ B. And then plot the MEAN as the blue dashed line:
 ```{r  echo=TRUE, message=FALSE}
 suppressPackageStartupMessages(library(ggplot2))
 
-p <- ggplot(total_steps_per_day, aes(x=date, y=totalSteps, fill=totalSteps))
-p <- p + geom_histogram(stat='identity')
-p <- p + scale_fill_gradient("Nº Steps", 
+p_mean <- ggplot(total_steps_per_day, aes(x=date, y=totalSteps, fill=totalSteps))
+p_mean <- p_mean + geom_histogram(stat='identity')
+p_mean <- p_mean + scale_fill_gradient("Nº Steps", 
                              low = "green", 
                              high = "red")
-p <- p + theme(text = element_text(size=10),axis.text.x = element_text(angle=90, vjust=1)) 
-p <- p + xlab("Date")
-p <- p + ylab("Total Number os Steps")
-p <- p + ggtitle("Histogram - MEAN of total Number of Steps per Day")
-p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
+p_mean <- p_mean + theme(text = element_text(size=10),axis.text.x = element_text(angle=90, vjust=1)) 
+p_mean <- p_mean + xlab("Date")
+p_mean <- p_mean + ylab("Total Number os Steps")
+p_mean <- p_mean + ggtitle("Histogram - MEAN of total Number of Steps per Day")
+p_mean <- p_mean + geom_hline(aes(yintercept=mean(totalSteps)), 
                     color="blue", 
                     linetype="dashed", 
                     size=0.5)
 
 # This 2 lines put the mean line in the legend or guide
- p <- p + geom_line(aes(color="Mean"), linetype="dashed")
- p <- p + scale_colour_manual(name="", values=c("Mean"= "blue"))
+ p_mean <- p_mean + geom_line(aes(color="Mean"), linetype="dashed")
+ p_mean <- p_mean + scale_colour_manual(name="", values=c("Mean"= "blue"))
 
 
-print(p)
+print(p_mean)
 ```
 
 
 C. First we can calculate the MEDIAN value:
 ```{r  echo=TRUE}
-median(total_steps_per_day$totalSteps)
+median_without_na <- median(total_steps_per_day$totalSteps)
+median_without_na
 ``` 
 
 D. And then plot the MEDIAN as the green dashed line:
@@ -103,25 +105,25 @@ D. And then plot the MEDIAN as the green dashed line:
 ```{r  echo=TRUE, message=FALSE}
 suppressPackageStartupMessages(library(ggplot2))
 
-p <- ggplot(total_steps_per_day, aes(x=date, y=totalSteps, fill=totalSteps))
-p <- p + geom_histogram(stat='identity')
-p <- p + scale_fill_gradient("Nº Steps", 
+p_median <- ggplot(total_steps_per_day, aes(x=date, y=totalSteps, fill=totalSteps))
+p_median <- p_median + geom_histogram(stat='identity')
+p_median <- p_median + scale_fill_gradient("Nº Steps", 
                              low = "green", 
                              high = "red")
-p <- p + theme(text = element_text(size=10),axis.text.x = element_text(angle=90, vjust=1)) 
-p <- p + xlab("Date")
-p <- p + ylab("Total Number os Steps")
-p <- p + ggtitle("Histogram - MEDIAN of total Number of Steps per Day")
-p <- p + geom_hline(aes(yintercept=mean(totalSteps)), 
+ p_median <- p_median + theme(text = element_text(size=10),axis.text.x = element_text(angle=90, vjust=1)) 
+p_median <- p_median + xlab("Date")
+p_median <- p_median + ylab("Total Number os Steps")
+p_median <- p_median + ggtitle("Histogram - MEDIAN of total Number of Steps per Day")
+p_median <- p_median + geom_hline(aes(yintercept=median(totalSteps)), 
                     color="green", 
                     linetype="dashed", 
                     size=0.5) 
 
 # This 2 lines put the mean line in the legend or guide
- p <- p + geom_line(aes(color="Median"), linetype="dashed")
- p <- p + scale_colour_manual(name="", values=c("Median"= "green"))
+ p_median <- p_median + geom_line(aes(color="Median"), linetype="dashed")
+ p_median <- p_median + scale_colour_manual(name="", values=c("Median"= "green"))
 
-print(p)
+print(p_median)
 ```
 
 NOTE: We use two different plots because the mean and median values are very similar. In this way, we can see the lines more clearly.
@@ -189,27 +191,116 @@ The total number of missing values in the dataset is **`r sum(is.na(data$steps))
 
 ### 2. Devise a strategy for filling in all of the missing values in the dataset
 
-**The strategy:** for filling in all of the missing values in the dataset, we want to use the **mean value for that day**. So, we need to calculate a new dataset with the mean of steps of each day.
+**The strategy:** for filling in all of the missing values in the dataset, we want to use the **mean value for each interval**. I think using tne mean of each day is not possible, because there are full days with no values (ie: the first day in dataset).    
+
+So, we need to make a copy of the original dataset. In this new dataset, we will add a **new column with the mean for each interval.**. For this purpouse we use *ave()* function. This function Group Averages Over Level Combinations of Factors (and much more, see ?ave in R).
+
+### 3. Create a new dataset that is equal to the original dataset but with the missing data filled in
 
 ```{r  echo=TRUE}
-mean_steps_per_day <- summarise(group_by(clean_data, date), mean(steps))
-colnames(mean_steps_per_day) <- c("date", "meanPerDay")
-head(mean_steps_per_day)
-```
-
-We use this *mean_steps_per_day* dataset to get the mean value for every day, and replace NA's in the original dataset *data*. We are going to do the changes in a new copy of the original dataset. The name of this new dataset is *data_copy*.
-
-```{r  echo=TRUE}
+## copy the original dataset into a new dataset
 data_copy <- data
+
+## Add a new column *mean_Steps_Per_Interval* with the mean for each interval: function "ave()" does that work.
+data_copy$mean_Steps_Per_Interval <- ave(data_copy$steps, 
+                                         data_copy$interval, 
+                                         FUN = function(x) mean(x, na.rm = T))
+
 head(data_copy)
 ```
 
-# add a new column AVERAGE whit the mean od steps for each day
-data_copy$Average <- ave(data_copy$steps, data_copy$date)
+Now, we can replace the steps column with NA's values, with the corresponding *mean_Steps_Per_Interval* column values in *data_copy* dataset.
 
-# order dataframe by column number 3 (interval)
-data_copy_ordered_by_interval <- data_copy[order(data_copy[, 3]), ]
+
+```{r  echo=TRUE}
+data_copy <- mutate(data_copy, steps = replace(data_copy$steps, 
+                                               is.na(data_copy$steps), 
+                                               data_copy$mean_Steps_Per_Interval))
+head(data_copy)
+```
+
+
+### 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+4.A - Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.
+
+First, we calculate the new dataset for total steps per day, using the new data *data_copy*, without NA's values.
+
+```{r  echo=TRUE}
+total_steps_per_day2 <- summarise(group_by(data_copy,date), sum(steps))
+colnames(total_steps_per_day2) <- c("date", "totalSteps")
+head(total_steps_per_day2)
+```
+
+
+In this case, we want to compare the **original histogram without NA's values** with the new histogram with **imputing missing values**.
+
+
+```{r  echo=TRUE}
+suppressPackageStartupMessages(library(ggplot2))
+
+## Load this script for multple plotting with ggplot2.
+## this script is available in my github repository for this assignment
+source("multiplot.R")
+
+# override the main title in the original plot
+p <- p + ggtitle("Histogram - Total Number of Steps per Day (without NA's values)")
+
+# Create a second plot for the new dataset with imputing missing values
+p2 <- ggplot(total_steps_per_day2, aes(x=date, y=totalSteps, fill=totalSteps))
+p2 <- p2 + geom_histogram(stat='identity')
+p2 <- p2 + scale_fill_gradient("Nº Steps", 
+                             low = "green", 
+                             high = "red")
+p2 <- p2 + theme(text = element_text(size=10),axis.text.x = element_text(angle=90, vjust=1)) 
+p2 <- p2 + xlab("Date")
+p2 <- p2 + ylab("Total Number os Steps")
+p2 <- p2 + ggtitle("Histogram - Total Number of Steps per Day (Imputing NA's Values)")
+
+## Call to multipot function for plotting the 2 plots in one column
+multiplot(p, p2, cols = 1)
+
+
+```
+
+
+4.B - Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment?
+
+First we can calculate the NEW MEAN:
+```{r  echo=TRUE}
+mean_imputing_na <- mean(total_steps_per_day2$totalSteps)
+mean_imputing_na
+``` 
+
+The old MEAN was:
+```{r  echo=TRUE}
+mean_without_na
+``` 
+
+The NEW MEDIAN is:
+```{r  echo=TRUE}
+median_imputing_na <- median(total_steps_per_day2$totalSteps)
+median_imputing_na
+``` 
+
+The old MEDIAN was:
+```{r  echo=TRUE}
+median_without_na
+``` 
+
+
+
+ * FIRST MEAN is identical to the NEW MEAN obtained with imputing NA's values.
+ * FIRST MEDIAN is almost the same that NEW MEDIAN obtained with imputing NA's values. In this case the MEDIAN and MEAN are identical.
+ 
+ 
+4.C - What is the impact of imputing missing data on the estimates of the total daily number of steps?
+ 
+ * IN THIS CASE, the impact of imputing missing data is minimal.
+
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
