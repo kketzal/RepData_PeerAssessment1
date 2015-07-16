@@ -519,7 +519,7 @@ xyplot(meanSteps ~ interval | day_type,
                panel.xyplot(x, y, ...)
                panel.abline(h = mean(y), lty=2,col="blue", ...)
                panel.abline(h = median(y), lty=2,col="green", ...)
-             },
+             },      
         type = "l",
         xlab = "Interval",
         ylab = "Mean of Number of Steps",
@@ -527,6 +527,8 @@ xyplot(meanSteps ~ interval | day_type,
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-24-1.png) 
+
+The blue line is the Mean, and the green line is the Median values.
 
 Now we can analyze separately several values for weekend days and weekday days.
 
