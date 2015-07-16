@@ -396,7 +396,7 @@ head(mean_steps_per_interval2)</code></pre>
 <p>Now, we can plot 2 panels, one for weekend and other for weekdays. In this case, we are going to use the <em>lattice</em> graphics package.</p>
 <pre class="r"><code>library(lattice)
 
-xyplot(meanSteps ~ interval | mean_steps_per_interval2$day_type, 
+xyplot(meanSteps ~ interval | day_type, 
         data = mean_steps_per_interval2,  
         panel = function(x, y, ...) {
                panel.xyplot(x, y, ...)
